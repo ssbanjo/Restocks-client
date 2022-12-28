@@ -1,7 +1,7 @@
 from asyncore import read
 from setuptools import setup, find_packages
 
-VERSION = '0.1.0'
+VERSION = '0.1.1'
 DESCRIPTION = 'Restocks.net client for Python'
 
 with open("README.md", "r", encoding="utf-8") as f:
