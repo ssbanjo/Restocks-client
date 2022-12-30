@@ -14,7 +14,7 @@ setup(
     version=about["__version__"],
     author=about["__author__"],
     description=about["__description__"],
-    license=about["__license"],
+    license=about["__license__"],
     packages=find_packages(),
     install_requires=["requests", "beautifulsoup4", "lxml"],
     long_description=readme,
