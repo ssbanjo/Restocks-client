@@ -12,7 +12,7 @@ You can either use the client with or without proxies. Proxies will rotate for e
 | ------------- | ------------- | :-------------: |
 | `search_products`  | Searches for products. | NO |
 | `get_product`  | Gets all the data of an specific product. | NO |
-| `get_size_lowest_price` | Gets the lowest price of a products size. | YES |
+| `get_size_lowest_price` | Gets the lowest price of a product size. | YES |
 | `get_sales_history` | Gets the account sold products. | YES |
 | `get_listings_history` | Gets the account current product listings. | YES |
 | `list_product` | Lists a product for sale. | YES |
