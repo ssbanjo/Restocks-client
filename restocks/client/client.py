@@ -154,7 +154,7 @@ class Client(ClientCore):
         product = res["data"][0]
         
         p = Product._from_json(product)
-        
+
         src = self._product_request(p.slug)
 
         variants = self._product_parsing(src)
@@ -199,7 +199,7 @@ class Client(ClientCore):
             duration: the listing duration.
 
         Returns:
-            A boolean that specifies if the product was listed successfuly.
+            A boolean that indicates if the product was listed successfuly.
         """        
         
         if not isinstance(product, Product):
@@ -208,8 +208,12 @@ class Client(ClientCore):
         
         price = self._get_sell_profit(store_price, sell_method)
         
-        size_id = SIZES_IDS[size]
+        size_id = SIZES_IDS.get(size)
         
+        if not size:
+            
+            raise SessionException("invalid size")
+                
         res = self._create_listing_request(
             product_id=product.id,
             sell_method=sell_method,
@@ -231,7 +235,7 @@ class Client(ClientCore):
             new_price: the new price.
 
         Returns:
-            A boolean that specifies if the listing was edited successfuly.
+            A boolean that indicates if the listing was edited successfuly.
         """        
         
         res = self._edit_listing_request(listing_id, new_price)
@@ -247,7 +251,7 @@ class Client(ClientCore):
             listing_id: the listing id.
 
         Returns:
-            A boolean that specifies if the listing was deleted successfuly.
+            A boolean that indicates if the listing was deleted successfuly.
         """        
         
         res = self._delete_listing_request(listing_id)
