@@ -12,7 +12,7 @@ def _image_to_slug(image: str) -> str:
 
 def _image_to_sku(image: str) -> str:
     
-    return re.findall('/products/([a-zA-Z0-9]+[-]?[a-zA-Z0-9]+)/', image)[0]
+    return re.findall('/products/(.*?)/', image)[0]
     
 
 class Variant(NamedTuple):
