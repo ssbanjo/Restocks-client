@@ -1,1 +1,1 @@
-"""Restocks.net client helpers"""
+"""Restocks.net client utils"""
