@@ -5,7 +5,7 @@ from ..exceptions import RequestException
 
 class _ProxyPool():
     
-    def __init__(self, proxy: Union[dict, list] = None) -> None:
+    def __init__(self, proxy: Union[dict, list, None]) -> None:
         
         match proxy:
             case dict(): self.pool = [proxy]
