@@ -1,10 +1,10 @@
-from enum import StrEnum
+from enum import IntEnum, StrEnum
 
-class ListingDuration(StrEnum):
+class ListingDuration(IntEnum):
 
-    Days30 = "30"
-    Days60 = "60"
-    Days90 = "90"
+    Days30 = 30
+    Days60 = 60
+    Days90 = 90
     
 class SellMethod(StrEnum):
 
