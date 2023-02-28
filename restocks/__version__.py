@@ -7,6 +7,6 @@
                                                                               
 __title__ = "restocks-client"
 __description__ = "Restocks.net client for Python."
-__version__ = "0.1.2"
+__version__ = "0.1.3"
 __author__ = "banjo"
 __license__ = "MIT"
