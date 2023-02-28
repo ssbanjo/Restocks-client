@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 from ..utils.helpers import parse_int, parse_size
 from ..utils.request import validate_response, _ProxyPool
 
+
 class ClientCore:
 
     _headers = {
@@ -19,14 +20,14 @@ class ClientCore:
         'sec-fetch-mode': 'cors',
         'sec-fetch-dest': 'empty',
     }
-    
+
     def __init__(self, proxy: Union[dict, list] = None) -> None:
 
         self._session = requests.Session()
 
         self._proxy_pool = _ProxyPool(proxy=proxy)
         self._session.proxies = self._proxy_pool.get_proxy()
-        
+
         self._base_url = "https://restocks.net"
 
         self._session_token = None
@@ -40,8 +41,8 @@ class ClientCore:
 
         return csrf_token.get("content") if csrf_token else None
 
-    def _set_locale(self):
-        
+    def _set_locale_request(self):
+
         url = self._base_url
 
         self._session.headers = {
@@ -58,9 +59,9 @@ class ClientCore:
         }
 
         res = self._session.get(url)
-        
+
         self._base_url = res.url
-        
+
     def _main_page_request(self) -> str:
 
         url = self._base_url
@@ -167,7 +168,8 @@ class ClientCore:
 
         soup = BeautifulSoup(src, "lxml")
 
-        sales = soup.find("tbody").find_all("tr")
+        sales = soup.find("tbody").find_all("tr") if soup.find(
+            "tbody") else soup.find_all("tr")
 
         products = []
 
@@ -176,7 +178,8 @@ class ClientCore:
             img = product.find("img")["src"]
             name, size, id, price, date = list(product.stripped_strings)
 
-            products.append({"name": name, "size": size, "id": id, "storeprice": price, "date": date, "image": img})
+            products.append({"name": name, "size": size, "id": id,
+                            "storeprice": price, "date": date, "image": img})
 
         return products
 
@@ -192,7 +195,8 @@ class ClientCore:
             "filters[0][range][price][gte]": 1
         }
 
-        res = requests.get(url, headers=headers, params=params, proxies=self._proxy_pool.get_proxy())
+        res = requests.get(url, headers=headers, params=params,
+                           proxies=self._proxy_pool.get_proxy())
 
         return validate_response(res, 200).json()
 
@@ -200,7 +204,8 @@ class ClientCore:
 
         headers = ClientCore._headers
 
-        res = requests.get(slug, headers=headers, proxies=self._proxy_pool.get_proxy())
+        res = requests.get(slug, headers=headers,
+                           proxies=self._proxy_pool.get_proxy())
 
         return validate_response(res, 200).text
 
@@ -218,11 +223,12 @@ class ClientCore:
         for variant in variants:
 
             oos = "out__of__stock" in variant.get("class")
-            
+
             size = variant.find("span", {"class": "text"}).text
             size = parse_size(size)
-            
-            price = variant.find("span", {"class": "float-right price"}).find_next("span").text
+
+            price = variant.find(
+                "span", {"class": "float-right price"}).find_next("span").text
             price = None if oos else parse_int(price)
 
             sizes[size] = price
@@ -264,7 +270,7 @@ class ClientCore:
 
         return res["payout"]["decimal"]
 
-    def _validate_listing_request(self, product_id: int, size_id: int, store_price: int, price: float, sell_method: str, duration: str) -> dict:
+    def _validate_listing_request(self, product_id: int, size_id: int, store_price: int, price: float, sell_method: str, duration: int) -> dict:
 
         url = self._base_url + "/account/sell/validate"
 
@@ -302,10 +308,10 @@ class ClientCore:
 
         return validate_response(res, 200).json()
 
-    def _create_listing_request(self, product_id: int, sell_method: str, size_id: int, store_price: int, price: float, duration: str) -> dict:
+    def _create_listing_request(self, product_id: int, sell_method: str, size_id: int, store_price: int, price: float, duration: int) -> dict:
 
         url = self._base_url + "/account/sell/create"
-        
+
         self._session.headers = {
             'Host': 'restocks.net',
             'sec-ch-ua': '"Google Chrome";v="107", "Chromium";v="107", "Not=A?Brand";v="24"',
@@ -335,15 +341,16 @@ class ClientCore:
             "listings[0][checkbox1_consignment]": '1',
             "listings[0][checkbox2_consignment]": '1'
         }
-        
+
         res = self._session.post(url, params=params)
 
         return validate_response(res, 200, "invalid listing data").json()
-    
+
     def _size_lowest_price_request(self, product_id: int, size_id: int) -> str:
 
-        url = self._base_url + f"/product/get-lowest-price/{product_id}/{size_id}"
-        
+        url = self._base_url + \
+            f"/product/get-lowest-price/{product_id}/{size_id}"
+
         headers = {
             'Host': 'restocks.net',
             'sec-ch-ua': '"Not?A_Brand";v="8", "Chromium";v="108", "Google Chrome";v="108"',
@@ -357,12 +364,12 @@ class ClientCore:
             'sec-fetch-dest': 'empty',
         }
 
-        res = self._session.get(url)         
+        res = self._session.get(url)
 
         return validate_response(res, 200).text
-    
-    def _listings_request(self, query: str, page: int, sell_method: str) -> dict:
-        
+
+    def _listings_history_request(self, query: str, page: int, sell_method: str) -> dict:
+
         url = self._base_url + f"/account/listings/{sell_method}"
 
         self._session.headers = {
@@ -381,38 +388,39 @@ class ClientCore:
             'page': page,
             'search': query,
         }
-        
+
         res = self._session.get(url, params=params)
 
         return validate_response(res, 200).json()
-    
-    
+
     @staticmethod
-    def _listings_parsing(src: str) -> dict:
+    def _listings_history_parsing(src: str) -> dict:
 
         soup = BeautifulSoup(src, "lxml")
 
-        sales = soup.find("tbody").find_all("tr")
-
+        sales = soup.find("tbody").find_all("tr") if soup.find("tbody") else soup.find_all("tr")
+        
         products = []
 
         for product in sales:
-            
+
             img = product.find("img")["src"]
             id = product.find("input", {"class", "baseproductid"})["value"]
-            
-            name, size, listing_id, price, date = list(product.stripped_strings)
+
+            name, size, listing_id, price, date = list(
+                product.stripped_strings)
 
             date = re.search(r'(\d+/\d+/\d+)', date).group(0)
-            
-            products.append({"name": name, "size": size, "listing_id": listing_id, "id": id, "storeprice": price, "date": date, "image": img})
+
+            products.append({"name": name, "size": size, "listing_id": listing_id,
+                            "id": id, "storeprice": price, "date": date, "image": img})
 
         return products
-    
+
     def _edit_listing_request(self, listing_id: int, new_price: int) -> dict:
-        
+
         url = self._base_url + "/account/listings/edit"
-        
+
         self._session.headers = {
             'Host': 'restocks.net',
             'sec-ch-ua': '"Not?A_Brand";v="8", "Chromium";v="108", "Google Chrome";v="108"',
@@ -432,15 +440,15 @@ class ClientCore:
             'id': listing_id,
             'store_price': new_price,
         }
-        
+
         res = self._session.post(url, params=params)
 
         return validate_response(res, 200, "invalid listing id").json()
-    
+
     def _delete_listing_request(self, listing_id: int) -> dict:
-        
+
         url = self._base_url + "/account/listings/delete"
-        
+
         self._session.headers = {
             'Host': 'restocks.net',
             'sec-ch-ua': '"Not?A_Brand";v="8", "Chromium";v="108", "Google Chrome";v="108"',
@@ -461,5 +469,5 @@ class ClientCore:
         }
 
         res = self._session.post(url, params=params)
-        
+
         return validate_response(res, 200).json()
